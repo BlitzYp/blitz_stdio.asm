@@ -1,0 +1,119 @@
+strlen:
+    push rcx
+    mov rcx, rdi
+    loop:
+        cmp byte [rcx], 0
+        je end
+        inc rcx
+        jmp loop
+    end:
+        ; Maybe this could also work mov rax, [rcx-rdi]
+        sub rcx, rdi
+        mov rax, rcx
+        pop rcx
+        ret
+
+print_string:
+    push rdi
+    call strlen ; returns the length of the string in rax
+    mov rsi, rdi
+    mov rdx, rax
+    mov rax, 1
+    mov rdi, 1
+    syscall 
+    pop rdi
+    ret
+
+;Takes in a number and a variable to store the string(int) in
+int_to_string:
+    mov rax, rsi ; The number
+    mov r11, rdi ;The variable
+    mov rbx, 10
+    push rbx
+put_values_in_the_stack:
+    mov rdx, 0
+    div rbx
+    add rdx, 48
+    push rdx
+    cmp rax, 0
+    jne put_values_in_the_stack
+putting_the_number_in_the_variable:
+    pop rcx
+    mov [r11], rcx
+    inc r11
+    cmp rcx, 10
+    jne putting_the_number_in_the_variable
+    ret
+
+%macro exit 0
+    mov rax, 60
+    xor rdi, rdi
+    syscall
+%endmacro
+
+get_user_input:
+    mov rcx, rdi
+    push rdi
+    push r8
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, rcx
+    mov rdx, r8
+    syscall
+    pop r8
+    pop rdi
+    push rax
+    call strlen
+    mov byte [rdi + rax], 0x0
+    pop rax
+    ret
+
+
+atoi:
+    mov rax, 0x0
+    push rbx
+    mov rbx, 0xA
+    push r11
+    push rcx
+    push rdi
+    mov r11, 0x2D ; '-'
+    cmp [rdi], r11
+    je switch_ops_atoi
+    mov r11, 1
+    atoi_loop:
+        movzx rcx, byte [rdi]
+        mul rbx
+        sub rcx, 0x30 ; ACSII 48
+        add rax, rcx
+        inc rdi
+        cmp byte [rdi], 0x0
+        je atoi_end
+        jmp atoi_loop
+    switch_ops_atoi:
+        mov r11, -1
+        inc rdi
+        jmp atoi_loop
+    atoi_end:
+        imul rax, r11
+        pop rdi
+        pop rcx
+        pop r11
+        pop rbx
+        ret
+
+
+; Src is rdi
+; dest is rsi
+strcpy:
+    push rax
+    xor rax, rax
+    strcpy_loop:
+        mov rcx, [rdi+rax]
+        mov [rsi+rax], rcx
+        inc rax
+        cmp byte [rdi+rax], 0x0
+        je strcpy_end
+        jmp strcpy_loop
+    strcpy_end:
+        pop rax
+        ret
