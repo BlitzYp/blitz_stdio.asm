@@ -1,3 +1,4 @@
+global strlen
 strlen:
     push rcx
     mov rcx, rdi
@@ -13,6 +14,7 @@ strlen:
         pop rcx
         ret
 
+global print_string
 print_string:
     push rdi
     call strlen ; returns the length of the string in rax
@@ -24,6 +26,7 @@ print_string:
     pop rdi
     ret
 
+global int_to_string
 ;Takes in a number and a variable to store the string(int) in
 int_to_string:
     mov rax, rsi ; The number
@@ -45,12 +48,14 @@ putting_the_number_in_the_variable:
     jne putting_the_number_in_the_variable
     ret
 
+global exit
 %macro exit 0
     mov rax, 60
     xor rdi, rdi
     syscall
 %endmacro
 
+global get_user_input
 get_user_input:
     mov rcx, rdi
     push rdi
@@ -68,7 +73,7 @@ get_user_input:
     pop rax
     ret
 
-
+global atoi
 atoi:
     mov rax, 0x0
     push rbx
@@ -101,7 +106,7 @@ atoi:
         pop rbx
         ret
 
-
+global strcpy
 ; Src is rdi
 ; dest is rsi
 strcpy:
@@ -116,4 +121,26 @@ strcpy:
         jmp strcpy_loop
     strcpy_end:
         pop rax
+        ret
+
+
+global strcmp
+strcmp:
+    push rdi
+    push rsi
+    loop_strcmp:
+        mov bx, [rsi]
+        mov cx, [rdi]
+        cmp bx, cx
+        jne strcmp_end
+        inc rsi
+        inc rdi
+        test cx, cx
+        jz strcmp_end
+        test bx, bx
+        jz strcmp_end
+    strcmp_end:
+        sub bx, cx
+        pop rsi
+        pop rdi
         ret
